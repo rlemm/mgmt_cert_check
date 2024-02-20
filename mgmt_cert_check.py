@@ -144,7 +144,7 @@ def process_list(ip):
                             if isinstance(all_devices['response']['result']['devices']['entry'], list):
                                 for device in all_devices['response']['result']['devices']['entry']:
                                     if device['connected'] == 'yes':
-                                        device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version'], style="on #afff5f")
+                                        device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version'])
                                         entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version']])
                             else:
                                 pass
