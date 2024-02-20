@@ -1,4 +1,4 @@
-# ![alt text](https://github.com/rlemm/mgmt_cert_check/palo.ico?raw=true) cert-mgmt-check
+# ![alt text][https://github.com/rlemm/mgmt_cert_check/palo.ico?raw=true](https://github.com/rlemm/mgmt_cert_check/blob/main/palo.ico) cert-mgmt-check
 This tool empowers you to effortlessly determine whether or not you are affected on your PANOS Firewalls and Panorama devices. The primary objective is to ensure that your devices operate on a PAN-OS version unaffected by the expiration of the management certificate on April 7th, 2024.  For further details, please refer to these links below:
 
 ### [Management Certificate Expiration on April 7th, 2024](https://live.paloaltonetworks.com/t5/customer-advisories/additional-pan-os-certificate-expirations-and-new-comprehensive/ta-p/572158)
