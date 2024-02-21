@@ -32,6 +32,10 @@ pip3 install -r requirements.txt
 pip install -r requirements.txt
 ```
 
+## Note for Decryption:
+
+Please use the tool on a host that traffic will not be decrypted between itself and the Panorama Devices
+
 ## Note for Windows Users:
 
 If you are running Microsoft Windows 10, you may need to run the following commands as well:
