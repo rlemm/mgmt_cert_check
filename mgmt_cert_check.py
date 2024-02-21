@@ -101,7 +101,7 @@ def process_list(ip):
         all_devices = xmltodict.parse(show_device_all_response.text)
 
     except IOError:
-        logging.error("IP Address: "+ip+" connection was refused. Please check connectivity.")
+        logging.error("IP Address: "+ip+" connection was refused. Please check connectivity.\n\n")
         skip = True
         pass
 
@@ -110,7 +110,7 @@ def process_list(ip):
         pass
 
     except AttributeError:
-        logging.error("No API key was returned.  Insufficient privileges or incorrect credentials given.")
+        logging.error("No API key was returned.  Insufficient privileges or incorrect credentials given.\n\n")
         skip = True
         pass
 
@@ -134,10 +134,10 @@ def process_list(ip):
                     if str(pos) == '1':
                         expiration_date = datetime.datetime.strptime(item.get_notAfter().decode("ascii"), "%Y%m%d%H%M%SZ")
                         if expiration_date < date:
-                            # print(f"Certificate expiration date for Panorama/PANOS Model: {model} IP: {ip}, {expiration_date}", "needs to be updated")
+                            # print(f"Certificate expiration date for Model: {model} IP: {ip}, {expiration_date}", "needs to be updated")
                             if model == 'Panorama' or model == 'panorama':
                                 model = 'VM Panorama'
-                            device_table = Table(title=f"Panorama/PANOS Model: {model} IP: {ip}, {expiration_date}, needs to be updated.\n\nDevices Managed by this Panorama", show_header=True, header_style="bold magenta", show_lines=True, title_justify="center", show_edge=True)
+                            device_table = Table(title=f"Model: {model}, Version: {panorama_version}, IP: {ip}, Cert Expiry Date: {expiration_date}, needs to be updated.\n\nDevices Managed by this Panorama", show_header=True, header_style="bold magenta", show_lines=True, title_justify="center", show_edge=True)
                             device_table.add_column("Device Name", justify="center")
                             device_table.add_column("IP Address", width=18, justify="center")
                             device_table.add_column("Device Model", justify="center")
@@ -164,7 +164,7 @@ def process_list(ip):
                         else:
                             if model == 'Panorama' or model == 'panorama':
                                 model = 'VM Panorama'
-                            device_table = Table(title=f"Panorama/PANOS Model: {model} IP: {ip}, {expiration_date}, is patched.\n\nDevices Managed by this Panorama", show_header=True, header_style="bold magenta", show_lines=True, title_justify="center", show_edge=True)
+                            device_table = Table(title=f"Model: {model}, Version: {panorama_version}, IP: {ip}, Cert Expiry Date: {expiration_date}, is patched.\n\nDevices Managed by this Panorama", show_header=True, header_style="bold magenta", show_lines=True, title_justify="center", show_edge=True)
                             device_table.add_column("Device Name", justify="center")
                             device_table.add_column("IP Address", width=18, justify="center")
                             device_table.add_column("Device Model", justify="center")
@@ -192,7 +192,7 @@ def process_list(ip):
                 pass
 
         except IOError:
-            logging.error("IP Address: "+ip+" connection was refused. Please check connectivity.")
+            logging.error("IP Address: "+ip+" connection was refused. Please check connectivity.\n\n")
             skip = True
             pass
 
