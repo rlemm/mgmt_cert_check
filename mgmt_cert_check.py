@@ -94,6 +94,7 @@ def process_list(ip):
         serial = dev_name_version['response']['result']['system']['serial']
         family = dev_name_version['response']['result']['system']['family']
         panorama_version = dev_name_version['response']['result']['system']['sw-version']
+        panorama_uptime = dev_name_version['response']['result']['system']['uptime']
 
         uri2 = "/api/?type=op&cmd=<show><devices><all></all></devices></show>&key=" + api_key
         full_url = "https://" + ip + uri2
@@ -137,7 +138,7 @@ def process_list(ip):
                             # print(f"Certificate expiration date for Model: {model} IP: {ip}, {expiration_date}", "needs to be updated")
                             if model == 'Panorama' or model == 'panorama':
                                 model = 'VM Panorama'
-                            device_table = Table(title=f"Model: {model}, Version: {panorama_version}, IP: {ip}, Cert Expiry Date: {expiration_date}, needs to be updated.\n\nDevices Managed by this Panorama", show_header=True, header_style="bold magenta", show_lines=True, title_justify="center", show_edge=True)
+                            device_table = Table(title=f"Model: {model}, Version: {panorama_version}, IP: {ip}, Uptime: {panorama_uptime}, Cert Date: {expiration_date}, needs to be updated.\n\nDevices Managed by this Panorama", show_header=True, header_style="bold magenta", show_lines=True, title_justify="center", show_edge=True)
                             device_table.add_column("Device Name", justify="center")
                             device_table.add_column("IP Address", width=18, justify="center")
                             device_table.add_column("Device Model", justify="center")
@@ -165,7 +166,7 @@ def process_list(ip):
                         else:
                             if model == 'Panorama' or model == 'panorama':
                                 model = 'VM Panorama'
-                            device_table = Table(title=f"Model: {model}, Version: {panorama_version}, IP: {ip}, Cert Expiry Date: {expiration_date}, is patched.\n\nDevices Managed by this Panorama", show_header=True, header_style="bold magenta", show_lines=True, title_justify="center", show_edge=True)
+                            device_table = Table(title=f"Model: {model}, Version: {panorama_version}, IP: {ip}, Uptime: {panorama_uptime}, Cert Date: {expiration_date}, is patched.\n\nDevices Managed by this Panorama", show_header=True, header_style="bold magenta", show_lines=True, title_justify="center", show_edge=True)
                             device_table.add_column("Device Name", justify="center")
                             device_table.add_column("IP Address", width=18, justify="center")
                             device_table.add_column("Device Model", justify="center")
