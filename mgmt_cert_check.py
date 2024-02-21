@@ -144,22 +144,21 @@ def process_list(ip):
                             device_table.add_column("Serial Number", justify="center")
                             device_table.add_column("PANOS Version", justify="center")
                             device_table.add_column("Content Version", justify="center")
+                            device_table.add_column("Status", justify="center")
                             if isinstance(all_devices['response']['result']['devices']['entry'], list):
                                 for device in all_devices['response']['result']['devices']['entry']:
                                     if device['connected'] == 'yes':
-                                        device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version'])
+                                        device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version'], 'connected')
                                         entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version']])
                                     else:
-                                        device_table.add_row('', '', '', device['serial'], '', '')
-                                        entries.append([ip, '', '', '', device['serial'], '', ''])
+                                        device_table.add_row('', '', '', device['serial'], '', '', 'disconnected')
                             else:
                                 device = all_devices['response']['result']['devices']['entry']
                                 if device['connected'] == 'yes':
-                                    device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version'])
+                                    device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version'], 'connected')
                                     entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version']])
                                 else:
-                                    device_table.add_row('', '', '', device['serial'], '', '')
-                                    entries.append([ip, '', '', '', device['serial'], '', ''])
+                                    device_table.add_row('', '', '', device['serial'], '', '', 'disconnected')
                             console.print(device_table, '\n\n')
 
                         else:
@@ -172,22 +171,21 @@ def process_list(ip):
                             device_table.add_column("Serial Number", justify="center")
                             device_table.add_column("PANOS Version", justify="center")
                             device_table.add_column("Content Version", justify="center")
+                            device_table.add_column("Status", justify="center")
                             if isinstance(all_devices['response']['result']['devices']['entry'], list):
                                 for device in all_devices['response']['result']['devices']['entry']:
                                     if device['connected'] == 'yes':
-                                        device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version'])
+                                        device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version'], 'connected')
                                         entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version']])
                                     else:
-                                        device_table.add_row('', '', '', device['serial'], '', '')
-                                        entries.append([ip, '', '', '', device['serial'], '', ''])
+                                        device_table.add_row('', '', '', device['serial'], '', '', 'disconnected')
                             else:
                                 device = all_devices['response']['result']['devices']['entry']
                                 if device['connected'] == 'yes':
-                                    device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version'])
+                                    device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version'], 'connected')
                                     entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version']])
                                 else:
-                                    device_table.add_row('', '', '', device['serial'], '', '')
-                                    entries.append([ip, '', '', '', device['serial'], '', ''])
+                                    device_table.add_row('', '', '', device['serial'], '', '', 'disconnected')
                             console.print(device_table, '\n\n')
 
             else:
