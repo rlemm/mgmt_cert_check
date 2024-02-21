@@ -129,29 +129,66 @@ def process_list(ip):
                 cert = conn.get_peer_cert_chain()
                 conn.close()
                 date = datetime.datetime.strptime("2024-04-08 14:35:41", "%Y-%m-%d %H:%M:%S")
-                device_table = Table(title="Devices connected to Panorama IP Address - "+ip, show_header=True, header_style="bold magenta", show_lines=True, title_justify="center", show_edge=True)
-                device_table.add_column("Device Name", justify="center")
-                device_table.add_column("IP Address", width=18, justify="center")
-                device_table.add_column("Device Model", justify="center")
-                device_table.add_column("Serial Number", justify="center")
-                device_table.add_column("PANOS Version", justify="center")
-                device_table.add_column("Content Version", justify="center")
+
                 for pos, item in enumerate(cert):
                     if str(pos) == '1':
                         expiration_date = datetime.datetime.strptime(item.get_notAfter().decode("ascii"), "%Y%m%d%H%M%SZ")
                         if expiration_date < date:
                             # print(f"Certificate expiration date for Panorama/PANOS Model: {model} IP: {ip}, {expiration_date}", "needs to be updated")
+                            if model == 'Panorama' or model == 'panorama':
+                                model = 'VM Panorama'
+                            device_table = Table(title=f"Panorama/PANOS Model: {model} IP: {ip}, {expiration_date}, needs to be updated.\n\nDevices Managed by this Panorama", show_header=True, header_style="bold magenta", show_lines=True, title_justify="center", show_edge=True)
+                            device_table.add_column("Device Name", justify="center")
+                            device_table.add_column("IP Address", width=18, justify="center")
+                            device_table.add_column("Device Model", justify="center")
+                            device_table.add_column("Serial Number", justify="center")
+                            device_table.add_column("PANOS Version", justify="center")
+                            device_table.add_column("Content Version", justify="center")
                             if isinstance(all_devices['response']['result']['devices']['entry'], list):
                                 for device in all_devices['response']['result']['devices']['entry']:
                                     if device['connected'] == 'yes':
                                         device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version'])
                                         entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version']])
+                                    else:
+                                        device_table.add_row('', '', '', device['serial'], '', '')
+                                        entries.append([ip, '', '', '', device['serial'], '', ''])
                             else:
-                                pass
+                                device = all_devices['response']['result']['devices']['entry']
+                                if device['connected'] == 'yes':
+                                    device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version'])
+                                    entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version']])
+                                else:
+                                    device_table.add_row('', '', '', device['serial'], '', '')
+                                    entries.append([ip, '', '', '', device['serial'], '', ''])
+                            console.print(device_table, '\n\n')
 
                         else:
-                            pass
-                console.print(device_table, '\n\n')
+                            if model == 'Panorama' or model == 'panorama':
+                                model = 'VM Panorama'
+                            device_table = Table(title=f"Panorama/PANOS Model: {model} IP: {ip}, {expiration_date}, is patched.\n\nDevices Managed by this Panorama", show_header=True, header_style="bold magenta", show_lines=True, title_justify="center", show_edge=True)
+                            device_table.add_column("Device Name", justify="center")
+                            device_table.add_column("IP Address", width=18, justify="center")
+                            device_table.add_column("Device Model", justify="center")
+                            device_table.add_column("Serial Number", justify="center")
+                            device_table.add_column("PANOS Version", justify="center")
+                            device_table.add_column("Content Version", justify="center")
+                            if isinstance(all_devices['response']['result']['devices']['entry'], list):
+                                for device in all_devices['response']['result']['devices']['entry']:
+                                    if device['connected'] == 'yes':
+                                        device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version'])
+                                        entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version']])
+                                    else:
+                                        device_table.add_row('', '', '', device['serial'], '', '')
+                                        entries.append([ip, '', '', '', device['serial'], '', ''])
+                            else:
+                                device = all_devices['response']['result']['devices']['entry']
+                                if device['connected'] == 'yes':
+                                    device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version'])
+                                    entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version']])
+                                else:
+                                    device_table.add_row('', '', '', device['serial'], '', '')
+                                    entries.append([ip, '', '', '', device['serial'], '', ''])
+                            console.print(device_table, '\n\n')
 
             else:
                 pass
