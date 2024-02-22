@@ -70,4 +70,4 @@ python mgmt_cert_check.py
 ```
 You'll be prompted to enter the name of the text file you created earlier and your credentials. Ensure you use credentials with API access rights. MFA credentials will not work with this tool. Use a common local service account; superuser rights are not necessary—readonly-superuser will work.
 
-Once the tool finishes running, you'll see results with different colors. Green indicates no action is needed, yellow means action is required based on the scenarios explained in the links on this GitRepo, and red means both actions need to be taken.
+Once the tool finishes running, you'll see results for Each Panorama Instance. Green indicates no action is needed and red means actions need to be taken to rectify the issue.
