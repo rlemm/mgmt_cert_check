@@ -148,7 +148,6 @@ def process_list(ip):
                             device_table.add_column("Uptime", justify="center")
                             device_table.add_column("Custom Certificate", justify="center")
                             device_table.add_column("Status", justify="center")
-                            print(all_devices)
                             if isinstance(all_devices['response']['result']['devices']['entry'], list):
                                 for device in all_devices['response']['result']['devices']['entry']:
                                     if device['connected'] == 'yes':
