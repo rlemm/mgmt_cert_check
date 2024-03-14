@@ -95,6 +95,8 @@ def process_list(ip):
         family = dev_name_version['response']['result']['system']['family']
         panorama_version = dev_name_version['response']['result']['system']['sw-version']
         panorama_uptime = dev_name_version['response']['result']['system']['uptime']
+        content_version = dev_name_version['response']['result']['system']['app-version']
+        supported_versions = ['8.1.21-h3', '8.1.25-h3', '8.1.26', '9.0.16-h7', '9.0.17-h5', '9.1.11-h5', '9.1.12-h7', '9.1.13-h5', '9.1.14-h8', '9.1.16-h5', '9.1.17', '10.0.8-h11', '10.0.11-h4', '10.0.12-h5', '10.1.3-h3', '10.1.4-h6', '10.1.5-h4', '10.1.6-h8', '10.1.7-h1', '10.1.8-h7', '10.1.9-h8', '10.1.10-h5', '10.1.11-h5', '10.1.12', '10.2.0-h2', '10.2.1-h1', '10.2.2-h4', '10.2.3-h11', '10.2.4-h10', '10.2.6-h1', '10.2.7-h3', '10.2.8', '11.0.0-h2', '11.0.1-h3', '11.0.2-h3', '11.0.3-h3',  '11.0.3-h5', '11.0.4', '11.1.0-h2', '11.1.1', '8.1.26-h1', '9.0.17-h5', '9.1.17-h1', '10.0.12-h5,10.1.12', '10.2.8', '11.0.4', '11.1.1', '9.0.6', '9.1.5', '10.0.7', '10.1.2', '10.2.2', '11.0.1', '8.1.26-h1', '9.0.17-h5', '9.1.17-h1', '10.0.12-h5', '10.1.12', '10.2.8', '11.0.4', '11.1.1']
 
         uri2 = "/api/?type=op&cmd=<show><devices><all></all></devices></show>&key=" + api_key
         full_url = "https://" + ip + uri2
@@ -138,59 +140,171 @@ def process_list(ip):
                             # print(f"Certificate expiration date for Model: {model} IP: {ip}, {expiration_date}", "needs to be updated")
                             if model == 'Panorama' or model == 'panorama':
                                 model = 'VM Panorama'
-                            device_table = Table(title=f"Model: {model}, Version: {panorama_version}, IP: {ip}, Uptime: {panorama_uptime}, Cert Date: {expiration_date}, needs to be updated.\n\nDevices Managed by this Panorama", show_header=True, header_style="bold magenta", show_lines=True, title_justify="center", show_edge=True)
+                            device_table = Table(title=f"[bold white on red]Model: {model}, Version: {panorama_version}, IP: {ip}, Uptime: {panorama_uptime}, Cert Date: {expiration_date}, needs to be updated.[/]\n\nDevices Managed by this Panorama", show_header=True, header_style="bold magenta", show_lines=True, title_justify="center", show_edge=True)
                             device_table.add_column("Device Name", justify="center")
                             device_table.add_column("IP Address", width=18, justify="center")
                             device_table.add_column("Device Model", justify="center")
                             device_table.add_column("Serial Number", justify="center")
                             device_table.add_column("PANOS Version", justify="center")
+                            device_table.add_column("PANOS Supported", justify="center")
                             device_table.add_column("Content Version", justify="center")
+                            device_table.add_column("Content Supported", justify="center")
                             device_table.add_column("Uptime", justify="center")
                             device_table.add_column("Custom Certificate", justify="center")
                             device_table.add_column("Status", justify="center")
                             if isinstance(all_devices['response']['result']['devices']['entry'], list):
                                 for device in all_devices['response']['result']['devices']['entry']:
+                                    try:
+                                        if device['sw-version'] in supported_versions:
+                                            supported_version = "Yes"
+                                        else:
+                                            supported_version = "No"
+                                    except KeyError:
+                                        supported_version = "No"
+                                    try:
+                                        if device['app-version'] == None:
+                                            supported_content_version = "No"
+                                        else:
+                                            if float(device['app-version'].replace("-", ".")) >= 8795.8489:
+                                                supported_content_version = "Yes"
+                                            else:
+                                                supported_content_version = "No"
+                                    except KeyError:
+                                        supported_content_version = "No"
                                     if device['connected'] == 'yes':
-                                        device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version'],  device['uptime'], device['custom-certificate-usage'], 'connected')
-                                        entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version'], device['uptime'], device['custom-certificate-usage']])
+                                        if supported_version == "Yes" and supported_content_version == "Yes":
+                                            device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'],  f"[bold white on green]{supported_version}[/]", device['app-version'], f"[bold white on green]{supported_content_version}[/]", device['uptime'], device['custom-certificate-usage'], 'connected')
+                                            entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], supported_version, device['app-version'], supported_content_version, device['uptime'], device['custom-certificate-usage']])
+                                        if supported_version == "No" and supported_content_version == "Yes":
+                                            device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'],  f"[bold white on red]{supported_version}[/]", device['app-version'], f"[bold white on green]{supported_content_version}[/]", device['uptime'], device['custom-certificate-usage'], 'connected')
+                                            entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], supported_version, device['app-version'], supported_content_version, device['uptime'], device['custom-certificate-usage']])
+                                        if supported_version == "Yes" and supported_content_version == "No":
+                                            device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'],  f"[bold white on green]{supported_version}[/]", device['app-version'], f"[bold white on red]{supported_content_version}[/]", device['uptime'], device['custom-certificate-usage'], 'connected')
+                                            entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], supported_version, device['app-version'], supported_content_version, device['uptime'], device['custom-certificate-usage']])
+                                        if supported_version == "No" and supported_content_version == "No":
+                                            device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'],  f"[bold white on red]{supported_version}[/]", device['app-version'], f"[bold white on red]{supported_content_version}[/]", device['uptime'], device['custom-certificate-usage'], 'connected')
+                                            entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], supported_version, device['app-version'], supported_content_version, device['uptime'], device['custom-certificate-usage']])
                                     else:
-                                        device_table.add_row('', '', '', device['serial'], '', '', '', '', 'disconnected')
+                                        device_table.add_row('', '', '', device['serial'], '', '', '', '', '', '', 'disconnected')
                             else:
                                 device = all_devices['response']['result']['devices']['entry']
+                                try:
+                                    if device['sw-version'] in supported_versions:
+                                        supported_version = "Yes"
+                                    else:
+                                        supported_version = "No"
+                                except KeyError:
+                                    supported_version = "No"
+                                try:
+                                    if device['app-version'] == None:
+                                        supported_content_version = "No"
+                                    else:
+                                        if float(device['app-version'].replace("-", ".")) >= 8795.8489:
+                                            supported_content_version = "Yes"
+                                        else:
+                                            supported_content_version = "No"
+                                except KeyError:
+                                    supported_content_version = "No"
                                 if device['connected'] == 'yes':
-                                    device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version'],  device['uptime'], device['custom-certificate-usage'], 'connected')
-                                    entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version'], device['uptime'], device['custom-certificate-usage']])
+                                    if supported_version == "Yes" and supported_content_version == "Yes":
+                                        device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'],  f"[bold white on green]{supported_version}[/]", device['app-version'], f"[bold white on green]{supported_content_version}[/]", device['uptime'], device['custom-certificate-usage'], 'connected')
+                                        entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], supported_version, device['app-version'], supported_content_version, device['uptime'], device['custom-certificate-usage']])
+                                    if supported_version == "No" and supported_content_version == "Yes":
+                                        device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'],  f"[bold white on red]{supported_version}[/]", device['app-version'], f"[bold white on green]{supported_content_version}[/]", device['uptime'], device['custom-certificate-usage'], 'connected')
+                                        entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], supported_version, device['app-version'], supported_content_version, device['uptime'], device['custom-certificate-usage']])
+                                    if supported_version == "Yes" and supported_content_version == "No":
+                                        device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'],  f"[bold white on green]{supported_version}[/]", device['app-version'], f"[bold white on red]{supported_content_version}[/]", device['uptime'], device['custom-certificate-usage'], 'connected')
+                                        entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], supported_version, device['app-version'], supported_content_version, device['uptime'], device['custom-certificate-usage']])
+                                    if supported_version == "No" and supported_content_version == "No":
+                                        device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'],  f"[bold white on red]{supported_version}[/]", device['app-version'], f"[bold white on red]{supported_content_version}[/]", device['uptime'], device['custom-certificate-usage'], 'connected')
+                                        entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], supported_version, device['app-version'], supported_content_version, device['uptime'], device['custom-certificate-usage']])
                                 else:
-                                    device_table.add_row('', '', '', device['serial'], '', '', '', '', 'disconnected')
+                                    device_table.add_row('', '', '', device['serial'], '', '', '', '', '', '', 'disconnected')
                             console.print(device_table, '\n\n')
 
                         else:
                             if model == 'Panorama' or model == 'panorama':
                                 model = 'VM Panorama'
-                            device_table = Table(title=f"Model: {model}, Version: {panorama_version}, IP: {ip}, Uptime: {panorama_uptime}, Cert Date: {expiration_date}, is patched.\n\nDevices Managed by this Panorama", show_header=True, header_style="bold magenta", show_lines=True, title_justify="center", show_edge=True)
+                            device_table = Table(title=f"[bold white on green]Model: {model}, Version: {panorama_version}, IP: {ip}, Uptime: {panorama_uptime}, Cert Date: {expiration_date}, is patched.[/]\n\nDevices Managed by this Panorama", show_header=True, header_style="bold magenta", show_lines=True, title_justify="center", show_edge=True)
                             device_table.add_column("Device Name", justify="center")
                             device_table.add_column("IP Address", width=18, justify="center")
                             device_table.add_column("Device Model", justify="center")
                             device_table.add_column("Serial Number", justify="center")
                             device_table.add_column("PANOS Version", justify="center")
+                            device_table.add_column("PANOS Supported", justify="center")
                             device_table.add_column("Content Version", justify="center")
+                            device_table.add_column("Content Supported", justify="center")
                             device_table.add_column("Uptime", justify="center")
                             device_table.add_column("Custom Certificate", justify="center")
                             device_table.add_column("Status", justify="center")
                             if isinstance(all_devices['response']['result']['devices']['entry'], list):
                                 for device in all_devices['response']['result']['devices']['entry']:
+                                    try:
+                                        if device['sw-version'] in supported_versions:
+                                            supported_version = "Yes"
+                                        else:
+                                            supported_version = "No"
+                                    except KeyError:
+                                        supported_version = "No"
+                                    try:
+                                        if device['app-version'] == None:
+                                            supported_content_version = "No"
+                                        else:
+                                            if float(device['app-version'].replace("-", ".")) >= 8795.8489:
+                                                supported_content_version = "Yes"
+                                            else:
+                                                supported_content_version = "No"
+                                    except KeyError:
+                                        supported_content_version = "No"
                                     if device['connected'] == 'yes':
-                                        device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version'],  device['uptime'], device['custom-certificate-usage'], 'connected')
-                                        entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version'], device['uptime'], device['custom-certificate-usage']])
+                                        if supported_version == "Yes" and supported_content_version == "Yes":
+                                            device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'],  f"[bold white on green]{supported_version}[/]", device['app-version'], f"[bold white on green]{supported_content_version}[/]", device['uptime'], device['custom-certificate-usage'], 'connected')
+                                            entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], supported_version, device['app-version'], supported_content_version, device['uptime'], device['custom-certificate-usage']])
+                                        if supported_version == "No" and supported_content_version == "Yes":
+                                            device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'],  f"[bold white on red]{supported_version}[/]", device['app-version'], f"[bold white on green]{supported_content_version}[/]", device['uptime'], device['custom-certificate-usage'], 'connected')
+                                            entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], supported_version, device['app-version'], supported_content_version, device['uptime'], device['custom-certificate-usage']])
+                                        if supported_version == "Yes" and supported_content_version == "No":
+                                            device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'],  f"[bold white on green]{supported_version}[/]", device['app-version'], f"[bold white on red]{supported_content_version}[/]", device['uptime'], device['custom-certificate-usage'], 'connected')
+                                            entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], supported_version, device['app-version'], supported_content_version, device['uptime'], device['custom-certificate-usage']])
+                                        if supported_version == "No" and supported_content_version == "No":
+                                            device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'],  f"[bold white on red]{supported_version}[/]", device['app-version'], f"[bold white on red]{supported_content_version}[/]", device['uptime'], device['custom-certificate-usage'], 'connected')
+                                            entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], supported_version, device['app-version'], supported_content_version, device['uptime'], device['custom-certificate-usage']])
                                     else:
-                                        device_table.add_row('', '', '', device['serial'], '', '', '', '', 'disconnected')
+                                        device_table.add_row('', '', '', device['serial'], '', '', '', '', '', '', 'disconnected')
                             else:
                                 device = all_devices['response']['result']['devices']['entry']
+                                try:
+                                    if device['sw-version'] in supported_versions:
+                                        supported_version = "Yes"
+                                    else:
+                                        supported_version = "No"
+                                except KeyError:
+                                    supported_version = "No"
+                                try:
+                                    if device['app-version'] == None:
+                                        supported_content_version = "No"
+                                    else:
+                                        if float(device['app-version'].replace("-", ".")) >= 8795.8489:
+                                            supported_content_version = "Yes"
+                                        else:
+                                            supported_content_version = "No"
+                                except KeyError:
+                                    supported_content_version = "No"
                                 if device['connected'] == 'yes':
-                                    device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version'],  device['uptime'], device['custom-certificate-usage'], 'connected')
-                                    entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], device['app-version'], device['uptime'], device['custom-certificate-usage']])
+                                    if supported_version == "Yes" and supported_content_version == "Yes":
+                                        device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'],  f"[bold white on green]{supported_version}[/]", device['app-version'], f"[bold white on green]{supported_content_version}[/]", device['uptime'], device['custom-certificate-usage'], 'connected')
+                                        entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], supported_version, device['app-version'], supported_content_version, device['uptime'], device['custom-certificate-usage']])
+                                    if supported_version == "No" and supported_content_version == "Yes":
+                                        device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'],  f"[bold white on red]{supported_version}[/]", device['app-version'], f"[bold white on green]{supported_content_version}[/]", device['uptime'], device['custom-certificate-usage'], 'connected')
+                                        entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], supported_version, device['app-version'], supported_content_version, device['uptime'], device['custom-certificate-usage']])
+                                    if supported_version == "Yes" and supported_content_version == "No":
+                                        device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'],  f"[bold white on green]{supported_version}[/]", device['app-version'], f"[bold white on red]{supported_content_version}[/]", device['uptime'], device['custom-certificate-usage'], 'connected')
+                                        entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], supported_version, device['app-version'], supported_content_version, device['uptime'], device['custom-certificate-usage']])
+                                    if supported_version == "No" and supported_content_version == "No":
+                                        device_table.add_row(device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'],  f"[bold white on red]{supported_version}[/]", device['app-version'], f"[bold white on red]{supported_content_version}[/]", device['uptime'], device['custom-certificate-usage'], 'connected')
+                                        entries.append([ip, device['hostname'], device['ip-address'], device['model'], device['serial'], device['sw-version'], supported_version, device['app-version'], supported_content_version, device['uptime'], device['custom-certificate-usage']])
                                 else:
-                                    device_table.add_row('', '', '', device['serial'], '', '', '', '', 'disconnected')
+                                    device_table.add_row('', '', '', device['serial'], '', '', '', '', '', '', 'disconnected')
                             console.print(device_table, '\n\n')
 
             else:
@@ -213,7 +327,7 @@ def process_list(ip):
 def sort_create_csv(entries):
     entries.sort()
     entries = list(entries for entries,_ in itertools.groupby(entries))
-    fields = ['Panorama-IP', 'Device-Name', 'IP-Address', 'Model', 'Serial-Number', 'PANOS-Version', 'Content-Version', 'Uptime', 'Custom-Certificate']
+    fields = ['Panorama-IP', 'Device-Name', 'IP-Address', 'Model', 'Serial-Number', 'PANOS-Version', 'PANOS-Supported', 'Content-Version', 'CV-Supported', 'Uptime', 'Custom-Certificate']
     with open(fw_devices_csv, 'w') as f:
         write = csv.writer(f)
         write.writerow(fields)
